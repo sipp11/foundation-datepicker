@@ -24,7 +24,7 @@
  * ========================================================= */
 
 !function( $ ) {
-
+	var yearLocaleOffset = 0;
 	function UTCDate(){
 		return new Date(Date.UTC.apply(Date, arguments));
 	}
@@ -36,8 +36,7 @@
 	// Picker object
 
 	var Datepicker = function(element, options) {
-		var that = this;
-
+		var that = this, BETh = 543;  // Buddist Era Thailand
 		this.element = $(element);
 		this.closeButton = options.closeButton;
 		this.language = options.language||this.element.data('date-language')||"en";
@@ -50,7 +49,7 @@
 		this.component = this.element.is('.date') ? this.element.find('.prefix, .postfix') : false;
 		this.hasInput = this.component && this.element.find('input').length;
 
-
+		if (this.language == "th") { yearLocaleOffset = BETh; }
 		this.onRender = options.onRender || function () {};
 		if(this.component && this.component.length === 0)
 			this.component = false;
@@ -404,7 +403,9 @@
 				currentDate = this.date && this.date.valueOf(),
 				today = new Date();
 			this.picker.find('.datepicker-days thead th.date-switch')
-						.text(dates[this.language].months[month]+' '+year);
+						.text(dates[this.language].months[month]+' '+
+								(year+yearLocaleOffset)
+						);
 			this.picker.find('tfoot th.today')
 						.text(dates[this.language].today)
 						.toggle(this.todayBtn !== false);
@@ -461,7 +462,7 @@
 
 			var months = this.picker.find('.datepicker-months')
 						.find('th:eq(1)')
-							.text(year)
+							.text(year+yearLocaleOffset)
 							.end()
 						.find('span').removeClass('active');
 			if (currentYear && currentYear == year) {
@@ -481,12 +482,15 @@
 			year = parseInt(year/10, 10) * 10;
 			var yearCont = this.picker.find('.datepicker-years')
 								.find('th:eq(1)')
-									.text(year + '-' + (year + 9))
+									.text((year+yearLocaleOffset) + '-' + (9+year+yearLocaleOffset))
 									.end()
 								.find('td');
 			year -= 1;
 			for (var i = -1; i < 11; i++) {
-				html += '<span class="year'+(i == -1 || i == 10 ? ' old' : '')+(currentYear == year ? ' active' : '')+(year < startYear || year > endYear ? ' disabled' : '')+'">'+year+'</span>';
+				html += '<span class="year'+(i == -1 || i == 10 ? ' old' : '')
+						+(currentYear == year ? ' active' : '')
+						+(year < startYear || year > endYear ? ' disabled' : '')+'">'
+						+(year+yearLocaleOffset)+'</span>';
 				year += 1;
 			}
 			yearCont.html(html);
@@ -576,7 +580,8 @@
 									date: this.viewDate
 								});
 							} else {
-								var year = parseInt(target.text(), 10)||0;
+								// minus localeOffset to get back to BCE
+								var year = parseInt(target.text()-yearLocaleOffset, 10)||0;
 								this.viewDate.setUTCFullYear(year);
 								this.element.trigger({
 									type: 'changeYear',
@@ -849,7 +854,15 @@
 		    months: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"],
 		    monthsShort: ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"],
 		    today: "Hoje"
-		}
+		},
+		th: {
+            days: ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัส", "ศุกร์", "เสาร์", "อาทิตย์"],
+            daysShort: ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส", "อา"],
+            daysMin: ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส", "อา"],
+            months: ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"],
+            monthsShort: ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."],
+            today: "วันนี้"
+    	}
 	};
 
 	var DPGlobal = {
